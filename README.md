@@ -13,15 +13,15 @@ Save all posts in your feed for ~2 days, archive all posts that are removed or e
 coll = weibo
 ```json
 {
-    id:"a",
-    content:"AA",
+    "id":"a",
+    "content":"AA",
 }
 ```
 coll = weibo_rev
 ```json
 {
-    id:"a",
-    content:"BB",
+    "id":"a",
+    "content":"BB",
 }
 ```
 
@@ -29,8 +29,8 @@ coll = weibo_rev
 coll = weibo
 ```json
 {
-    id:"a",
-    content:"AA",
+    "id":"a",
+    "content":"AA",
 }
 ```
 
@@ -43,18 +43,18 @@ coll = weibo_rev
 coll = weibo
 ```json
 {
-    id:"a",
-    content:"AA",
-    publish_time:"2022-07-22 13:00",
+    "id":"a",
+    "content":"AA",
+    "publish_time":"2022-07-22 13:00",
 }
 ```
 
 coll = weibo_rev
 ```json
 {
-    id:"a",
-    content:"AA",
-    publish_time:"2022-07-22 13:00",
+    "id":"a",
+    "content":"AA",
+    "publish_time":"2022-07-22 13:00",
 }
 ```
 
