@@ -22,7 +22,7 @@ def remove_unchanged(connection_string):
     移除两个collections的交集
     算法有待优化
     """
-    print("removing unchanged weibo...")
+    logger.info("removing unchanged weibo...")
     client = MongoClient(connection_string)
     db = client["weibo"]
     coll_wb, coll_rev = db["weibo"], db["weibo_rev"]
@@ -43,12 +43,12 @@ def remove_unchanged(connection_string):
         doc_wb = coll_wb.find_one({"id": doc_rev["id"]}, {"_id": 1, "content": 1})
         if doc_wb and doc_wb["content"] == doc_rev["content"]:
             del_count += 1
-            print(f"delete doc with id = \"{doc_rev['id']}'\" from weibo coll")
+            logger.info(f"delete doc with id = \"{doc_rev['id']}'\" from weibo coll")
             coll_wb.delete_one({"_id": doc_wb["_id"]})
         coll_rev.delete_one({"_id": doc_rev["_id"]})
 
     # log deletion report
-    print(f"{del_count}/{len(weibo_rev_list)} deleted from weibo coll")
+    logger.info(f"{del_count}/{len(weibo_rev_list)} deleted from weibo coll")
 
 
 def main(_):
@@ -86,12 +86,13 @@ if __name__ == "__main__":
         config = json.loads(f.read())
     config["since_date"] = rev_range_since.strftime("%Y-%m-%d %H:%M")
     config["end_date"] = "now"
+    logger.info('Updating "since_date" to: {}'.format(config["since_date"]))
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)
 
     # start running
     while True:
-        print(f"Sleeping for {SLEEP_TIME}s...")
+        logger.info(f"Sleeping for {SLEEP_TIME}s...")
         time.sleep(SLEEP_TIME)
 
         # If REV_INTERVAL passed since last rev, run spider_rev
