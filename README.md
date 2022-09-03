@@ -108,6 +108,23 @@ coll = weibo_rev
 又或者：将主程序分为两个并行的脚本，脚本0使用`user_id_list.txt`设置文件（可以自动更新since date），脚本1使用整数范围日期（但是不知道怎么设置end date）。
 
 
+## Installation
+Install dependency `weibo-spider`
+```bash
+git clone https://github.com/dataabc/weiboSpider.git
+cd weiboSpider/
+pip install -r requirements.txt .
+```
+
+Install from source code
+```bash
+$ git clone https://github.com/jerrylaikr/weibo-anti-censorship.git
+$ cd weibo-anti-censorship
+$ pip install .
+```
+Prepare `config.json` and `user_id_list.txt`
+
+
 ## Run script
 
 ```bash
