@@ -21,6 +21,7 @@ setuptools.setup(
         "weibo-spider",
         "absl-py",
         "pymongo",
+        "pytz",
     ],
     python_requires=">=3.6",
 )
