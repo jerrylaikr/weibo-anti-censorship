@@ -10,11 +10,39 @@ import logging
 from wbac.spider_rev import main_rev
 from pymongo import MongoClient
 import pytz  # TZ CHANGE
+import codecs
 
 
 REV_INTERVAL = timedelta(hours=12)
 SLEEP_TIME = 60 * 10  # in seconds
 logger = logging.getLogger("spider")
+
+
+def initialize_user_config(user_config_file_path, since_date):
+    """
+    更新用户配置文件的所有since_date
+    """
+    if not user_config_file_path:
+        user_config_file_path = os.getcwd() + os.sep + "user_id_list.txt"
+    cnt = 0
+    with open(user_config_file_path, "rb") as f:
+        lines = f.read().splitlines()
+        lines = [line.decode("utf-8-sig") for line in lines]
+        for i, line in enumerate(lines):
+            info = line.split(" ")
+            if len(info) > 1:
+                cnt += 1
+                if len(info) == 2:
+                    info.append(since_date)
+                if len(info) > 3 and config_util._is_date(info[2] + " " + info[3]):
+                    del info[3]
+                if len(info) > 2:
+                    info[2] = since_date
+                lines[i] = " ".join(info)
+    with codecs.open(user_config_file_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+    logger.info(f"updated start time of {cnt} users")
 
 
 def remove_unchanged(connection_string):
@@ -89,6 +117,8 @@ if __name__ == "__main__":
     logger.info('Updating "since_date" to: {}'.format(config["since_date"]))
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)
+
+    initialize_user_config(config["user_id_list"], config["since_date"])
 
     # start running
     while True:
