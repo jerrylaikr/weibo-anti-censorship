@@ -19,7 +19,7 @@ setuptools.setup(
     ],
     install_requires=[
         "weibo-spider",
-        "absl",
+        "absl-py",
         "pymongo",
     ],
     python_requires=">=3.6",
