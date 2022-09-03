@@ -8,17 +8,47 @@ from absl.app import parse_flags_with_usage, _run_init, _init_callbacks
 import time
 import logging
 from wbac.spider_rev import main_rev
+from pymongo import MongoClient
 import pytz  # TZ CHANGE
 
 
-REV_INTERVAL = timedelta(minutes=30)
-SLEEP_TIME = 600
+REV_INTERVAL = timedelta(hours=12)
+SLEEP_TIME = 60 * 10  # in seconds
 logger = logging.getLogger("spider")
 
 
-def remove_unchanged():
+def remove_unchanged(connection_string):
+    """
+    移除两个collections的交集
+    算法有待优化
+    """
     print("removing unchanged weibo...")
-    pass
+    client = MongoClient(connection_string)
+    db = client["weibo"]
+    coll_wb, coll_rev = db["weibo"], db["weibo_rev"]
+    weibo_rev_list = []
+
+    # get all documents from weibo_rev collection
+    for doc_rev in coll_rev.find(
+        {}, {"_id": 1, "id": 1, "content": 1}, sort=[("publish_time", 1)]
+    ):
+        weibo_rev_list.append(doc_rev)
+
+    # for each document in weibo_rev collection
+    # if the document in weibo collection with the same id
+    # has identical content (i.e. exists and is not modified)
+    # remove such document from both collection
+    del_count = 0
+    for doc_rev in weibo_rev_list:
+        doc_wb = coll_wb.find_one({"id": doc_rev["id"]}, {"_id": 1, "content": 1})
+        if doc_wb and doc_wb["content"] == doc_rev["content"]:
+            del_count += 1
+            print(f"delete doc with id = \"{doc_rev['id']}'\" from weibo coll")
+            coll_wb.delete_one({"_id": doc_wb["_id"]})
+        coll_rev.delete_one({"_id": doc_rev["_id"]})
+
+    # log deletion report
+    print(f"{del_count}/{len(weibo_rev_list)} deleted from weibo coll")
 
 
 def main(_):
@@ -29,7 +59,6 @@ def main(_):
         wb.start()  # 爬取微博信息
     except Exception as e:
         raise
-        sys.exit()
 
 
 def run(
@@ -65,10 +94,7 @@ if __name__ == "__main__":
         print(f"Sleeping for {SLEEP_TIME}s...")
         time.sleep(SLEEP_TIME)
 
-        # Run weibo_spider
-        run(main)
-
-        # If REV_INTERVAL passed since last rev, run rev
+        # If REV_INTERVAL passed since last rev, run spider_rev
         now = datetime.now().astimezone(pytz.timezone("PRC"))  # TZ CHANGE
         rev_range_end = rev_range_since + REV_INTERVAL
         if now > rev_range_end + REV_INTERVAL:
@@ -76,5 +102,8 @@ if __name__ == "__main__":
                 rev_range_since.strftime("%Y-%m-%d %H:%M"),
                 rev_range_end.strftime("%Y-%m-%d %H:%M"),
             )
-            remove_unchanged()
+            remove_unchanged(config["mongo_config"]["connection_string"])
             rev_range_since += REV_INTERVAL
+
+        # Run spider
+        run(main)

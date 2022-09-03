@@ -349,7 +349,6 @@ def main_rev(since_date, end_date):
         wb.start()  # 爬取微博信息
     except Exception as e:
         raise
-        sys.exit()
 
 
 logger = logging.getLogger("spider.mongo_writer")
