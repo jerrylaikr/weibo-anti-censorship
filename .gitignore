@@ -12,6 +12,6 @@ config_rev.json
 
 weibo/
 weibo.db
-*.log
+*.log*
 
 .idea
